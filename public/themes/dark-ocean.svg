@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="air" x1="195" y1="0" x2="195" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7EB6E8"/>
+      <stop offset="100%" stop-color="#B7D8F5"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="195" y1="250" x2="195" y2="844" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2F7FCF"/>
+      <stop offset="45%" stop-color="#124A8A"/>
+      <stop offset="100%" stop-color="#031225"/>
+    </linearGradient>
+  </defs>
+  <!-- Far: sky + deep water wash -->
+  <g data-layer="far">
+    <rect width="390" height="260" fill="url(#air)"/>
+    <rect y="250" width="390" height="594" fill="url(#sea)"/>
+    <circle cx="320" cy="70" r="28" fill="#F4F8FF" opacity="0.95"/>
+    <circle cx="80" cy="380" r="1.5" fill="#9FD0FF" opacity="0.5"/>
+    <circle cx="140" cy="450" r="1.2" fill="#9FD0FF" opacity="0.4"/>
+    <circle cx="250" cy="420" r="1.4" fill="#9FD0FF" opacity="0.45"/>
+    <circle cx="300" cy="520" r="1.1" fill="#9FD0FF" opacity="0.35"/>
+    <circle cx="60" cy="560" r="1.3" fill="#9FD0FF" opacity="0.4"/>
+  </g>
+  <!-- Mid: island at surface + fish schools -->
+  <g data-layer="mid">
+    <path d="M145 248 C165 232 205 228 235 242 C255 252 265 258 250 262 H155 C148 258 140 252 145 248 Z" fill="#0C2748"/>
+    <path d="M175 248 C170 220 155 200 160 175 C168 200 180 215 188 235" fill="#0C2748"/>
+    <path d="M200 245 C198 215 210 190 230 175 C215 200 208 220 205 240" fill="#0C2748"/>
+    <path d="M220 248 C230 220 250 200 270 190 C250 210 235 230 225 245" fill="#0C2748"/>
+    <g fill="#0A1F3A" opacity="0.85">
+      <ellipse cx="90" cy="360" rx="10" ry="4" transform="rotate(-12 90 360)"/>
+      <ellipse cx="115" cy="372" rx="8" ry="3.5" transform="rotate(-8 115 372)"/>
+      <ellipse cx="100" cy="385" rx="7" ry="3" transform="rotate(-15 100 385)"/>
+      <ellipse cx="250" cy="400" rx="11" ry="4" transform="rotate(10 250 400)"/>
+      <ellipse cx="275" cy="412" rx="8" ry="3.2" transform="rotate(6 275 412)"/>
+      <ellipse cx="240" cy="420" rx="7" ry="3" transform="rotate(12 240 420)"/>
+      <ellipse cx="160" cy="480" rx="9" ry="3.5" transform="rotate(-6 160 480)"/>
+      <ellipse cx="185" cy="492" rx="7" ry="3" transform="rotate(-10 185 492)"/>
+      <ellipse cx="310" cy="540" rx="10" ry="3.8" transform="rotate(8 310 540)"/>
+      <ellipse cx="330" cy="555" rx="7" ry="3" transform="rotate(4 330 555)"/>
+    </g>
+    <path d="M70 520 C78 500 95 505 92 525 C88 540 75 535 70 520 Z" fill="#0A1F3A" opacity="0.7"/>
+  </g>
+  <!-- Near: reef silhouettes -->
+  <g data-layer="near" fill="#041224">
+    <path d="M0 680 C40 640 70 700 110 670 C150 640 170 710 210 690 C250 670 280 730 320 700 C350 680 370 720 390 710 V844 H0 Z"/>
+    <path d="M20 844 V720 C35 690 55 700 50 740 C65 710 80 730 72 770 C90 740 110 760 100 800 V844 Z"/>
+    <path d="M300 844 V740 C315 710 340 720 335 760 C350 735 370 755 365 790 C380 765 390 780 388 810 V844 Z"/>
+    <path d="M160 844 V760 C175 730 195 745 190 780 C205 755 220 770 215 800 V844 Z" opacity="0.9"/>
+  </g>
+</svg>

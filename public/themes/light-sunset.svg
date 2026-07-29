@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="195" y1="0" x2="195" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F07A3A"/>
+      <stop offset="35%" stop-color="#F9A04A"/>
+      <stop offset="70%" stop-color="#FFD27A"/>
+      <stop offset="100%" stop-color="#FFE9B8"/>
+    </linearGradient>
+  </defs>
+  <!-- Far: sky -->
+  <g data-layer="far">
+    <rect width="390" height="844" fill="url(#sky)"/>
+    <ellipse cx="60" cy="120" rx="70" ry="10" fill="#FFF8EC" opacity="0.9"/>
+    <ellipse cx="180" cy="160" rx="90" ry="12" fill="#FFF8EC" opacity="0.75"/>
+    <ellipse cx="310" cy="100" rx="55" ry="8" fill="#FFF8EC" opacity="0.85"/>
+    <ellipse cx="250" cy="210" rx="65" ry="9" fill="#FFF8EC" opacity="0.55"/>
+  </g>
+  <!-- Mid: ocean + beach -->
+  <g data-layer="mid">
+    <path d="M0 360 H390 V520 H0 Z" fill="#8BA7A6"/>
+    <path d="M0 420 C90 400 160 430 250 450 C320 465 360 455 390 470 V620 H0 Z" fill="#F4A460"/>
+    <path d="M0 560 C80 540 140 580 220 575 C300 570 340 590 390 585 V844 H0 Z" fill="#E8944A" opacity="0.55"/>
+  </g>
+  <!-- Near: palm + shoreline silhouette -->
+  <g data-layer="near" fill="#1A2B4C">
+    <path d="M0 640 C40 610 90 660 140 650 C200 638 240 690 280 700 C320 710 360 690 390 720 V844 H0 Z"/>
+    <path d="M48 844 V290"/>
+    <path d="M48 310 C20 250 5 210 18 170 C35 210 55 240 72 270 C40 230 25 190 35 150 C55 195 75 235 95 270 C70 220 70 175 90 130 C100 185 105 235 110 285 C95 250 75 290 48 310 Z" opacity="0.98"/>
+    <path d="M52 300 C90 250 130 230 175 220 C130 245 95 275 70 310" opacity="0.95"/>
+    <path d="M45 320 C10 280 -10 250 5 210 C25 255 40 285 55 315" opacity="0.9"/>
+    <circle cx="48" cy="288" r="8" fill="#243859"/>
+  </g>
+</svg>
