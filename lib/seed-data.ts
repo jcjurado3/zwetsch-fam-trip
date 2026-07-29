@@ -59,11 +59,11 @@ export const seedItinerary: ItineraryItem[] = [
     trip_id: SEED_TRIP_ID,
     day_date: "2026-08-05",
     sort_order: 1,
-    time: null,
+    time: "15:14",
     title: "Fly In — UA 1010",
     location: "Tampa International Airport (TPA)",
     description:
-      "Arrive in Tampa on United UA 1010. Settle into lodging and shake off travel day.",
+      "Arrive in Tampa on United UA 1010 (9:40 am – 3:14 pm). Settle into lodging and shake off travel day.",
     image_url:
       "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80",
     lat: 27.9755,
@@ -256,7 +256,7 @@ export const seedItinerary: ItineraryItem[] = [
     time: "16:16",
     title: "Fly Out — UA 498",
     location: "Tampa International Airport (TPA)",
-    description: "Departure on United UA 498 at 4:16 pm. Leave for TPA with buffer for security.",
+    description: "Departure on United UA 498 at 4:16 pm (arrive 6:16 pm). Leave for TPA with buffer for security.",
     image_url:
       "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80",
     lat: 27.9755,

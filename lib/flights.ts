@@ -11,7 +11,9 @@ export interface TripFlight {
   date: string;
   departureIata: string | null;
   arrivalIata: string | null;
-  scheduledLocalTime: string | null;
+  /** Local clock times used as planned placeholders, HH:mm */
+  scheduledDepartureLocal: string | null;
+  scheduledArrivalLocal: string | null;
 }
 
 export interface FlightStatus {
@@ -62,7 +64,8 @@ export const TRIP_FLIGHTS: TripFlight[] = [
     date: "2026-08-05",
     departureIata: null,
     arrivalIata: "TPA",
-    scheduledLocalTime: null,
+    scheduledDepartureLocal: "09:40",
+    scheduledArrivalLocal: "15:14",
   },
   {
     id: "flight-out",
@@ -75,7 +78,8 @@ export const TRIP_FLIGHTS: TripFlight[] = [
     date: "2026-08-11",
     departureIata: "TPA",
     arrivalIata: null,
-    scheduledLocalTime: "16:16",
+    scheduledDepartureLocal: "16:16",
+    scheduledArrivalLocal: "18:16",
   },
 ];
 
@@ -134,8 +138,8 @@ function scheduledFallback(
     departure: {
       airport: isOutbound ? "Tampa International Airport" : null,
       iata: flight.departureIata,
-      scheduled: flight.scheduledLocalTime
-        ? `${flight.date}T${flight.scheduledLocalTime}:00`
+      scheduled: flight.scheduledDepartureLocal
+        ? `${flight.date}T${flight.scheduledDepartureLocal}:00`
         : null,
       estimated: null,
       actual: null,
@@ -146,7 +150,9 @@ function scheduledFallback(
     arrival: {
       airport: !isOutbound ? "Tampa International Airport" : null,
       iata: flight.arrivalIata,
-      scheduled: null,
+      scheduled: flight.scheduledArrivalLocal
+        ? `${flight.date}T${flight.scheduledArrivalLocal}:00`
+        : null,
       estimated: null,
       actual: null,
       delayMinutes: null,
@@ -170,23 +176,24 @@ function pickMatchingFlight(
 ): AviationstackFlight | null {
   if (!data.length) return null;
 
+  // Never fall back to another day's UA1010/UA498 — those are different routes.
   const byDate = data.filter((f) => f.flight_date === tripFlight.date);
-  const pool = byDate.length ? byDate : data;
+  if (!byDate.length) return null;
 
   if (tripFlight.arrivalIata) {
-    const match = pool.find(
+    const match = byDate.find(
       (f) => f.arrival?.iata?.toUpperCase() === tripFlight.arrivalIata
     );
     if (match) return match;
   }
   if (tripFlight.departureIata) {
-    const match = pool.find(
+    const match = byDate.find(
       (f) => f.departure?.iata?.toUpperCase() === tripFlight.departureIata
     );
     if (match) return match;
   }
 
-  return pool[0] ?? null;
+  return byDate[0] ?? null;
 }
 
 function fromLive(
@@ -199,7 +206,7 @@ function fromLive(
     label: tripFlight.label,
     direction: tripFlight.direction,
     flightIata: tripFlight.flightIata,
-    date: live.flight_date ?? tripFlight.date,
+    date: tripFlight.date,
     status: normalizeStatus(live.flight_status),
     statusSource: "live",
     departure: {
@@ -238,59 +245,60 @@ async function fetchAviationstackFlight(
   const params = new URLSearchParams({
     access_key: accessKey,
     flight_iata: tripFlight.flightIata,
+    // Always look up the trip date — never default to "today"
+    flight_date: tripFlight.date,
     limit: "10",
   });
 
-  // Free plan historically required HTTP; HTTPS works on paid — try HTTPS first.
-  const urls = [
-    `https://api.aviationstack.com/v1/flights?${params}`,
-    `http://api.aviationstack.com/v1/flights?${params}`,
-  ];
+  if (tripFlight.arrivalIata) {
+    params.set("arr_iata", tripFlight.arrivalIata);
+  }
+  if (tripFlight.departureIata) {
+    params.set("dep_iata", tripFlight.departureIata);
+  }
 
-  let lastError: string | null = null;
+  // Free plan: HTTP only. Paid: HTTPS. Prefer HTTP first so free keys succeed.
+  const urls = [
+    `http://api.aviationstack.com/v1/flights?${params}`,
+    `https://api.aviationstack.com/v1/flights?${params}`,
+  ];
 
   for (const url of urls) {
     try {
       const res = await fetch(url, {
         next: { revalidate: 21600 }, // 6h — spare free-tier quota
+        redirect: "manual", // avoid HTTP→HTTPS upgrade killing free-plan calls
       });
 
-      if (!res.ok) {
-        lastError = `Aviationstack HTTP ${res.status}`;
-        continue;
-      }
-
-      const json = (await res.json()) as {
+      const json = (await res.json().catch(() => null)) as {
         data?: AviationstackFlight[];
-        error?: { message?: string; code?: number };
-      };
+        error?: { message?: string; code?: string | number };
+      } | null;
+
+      if (!res.ok || !json) continue;
 
       if (json.error?.message) {
-        lastError = json.error.message;
-        // Free plan HTTPS rejection → try HTTP next
-        continue;
+        // Free HTTPS restriction → try next URL; other plan/date limits → quiet schedule
+        if (
+          String(json.error.code) === "https_access_restricted" ||
+          /https/i.test(json.error.message)
+        ) {
+          continue;
+        }
+        return scheduledFallback(tripFlight, null);
       }
 
       const match = pickMatchingFlight(json.data ?? [], tripFlight);
-      if (!match) {
-        return scheduledFallback(
-          tripFlight,
-          "Live status isn’t published yet — check closer to departure day."
-        );
-      }
+      if (!match) continue;
 
       return fromLive(tripFlight, match);
     } catch {
-      lastError = "Network error reaching Aviationstack";
+      // network / redirect blocked — try next URL
     }
   }
 
-  return scheduledFallback(
-    tripFlight,
-    lastError
-      ? `Couldn’t refresh live status (${lastError}). Showing trip schedule.`
-      : "Couldn’t refresh live status. Showing trip schedule."
-  );
+  // Quiet planned card — don't surface HTTP 403 / plan errors to the family
+  return scheduledFallback(tripFlight, null);
 }
 
 export function getTripFlightByItineraryId(
