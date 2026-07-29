@@ -157,14 +157,10 @@ export function FloatingIslandNav() {
     >
       <div
         ref={islandRef}
-        className="pointer-events-auto relative flex h-14 items-center justify-center overflow-hidden border border-surface-border shadow-[0_12px_40px_rgba(0,0,0,0.18)]"
+        className="floating-island pointer-events-auto relative flex h-14 items-center justify-center overflow-hidden border shadow-[0_12px_40px_rgba(0,0,0,0.18)]"
         style={{
           width: 56,
           borderRadius: 999,
-          background:
-            "color-mix(in srgb, var(--surface-solid) 92%, transparent)",
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
         }}
       >
         <button
@@ -195,10 +191,8 @@ export function FloatingIslandNav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`island-item flex flex-col items-center gap-0.5 rounded-2xl px-1.5 py-1.5 transition-colors ${
-                    isActive
-                      ? "text-primary"
-                      : "text-muted hover:text-foreground"
+                  className={`island-item floating-island__link flex flex-col items-center gap-0.5 rounded-2xl px-1.5 py-1.5 transition-colors ${
+                    isActive ? "floating-island__link--active" : ""
                   }`}
                 >
                   <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
@@ -213,10 +207,10 @@ export function FloatingIslandNav() {
           <div className="island-item ml-1 flex shrink-0 items-center gap-1 border-l border-surface-border pl-1.5">
             <Link
               href="/itinerary/map"
-              className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+              className={`floating-island__action flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
                 pathname === "/itinerary/map"
-                  ? "bg-primary/15 text-primary"
-                  : "text-muted hover:bg-primary/10 hover:text-foreground"
+                  ? "floating-island__action--active"
+                  : ""
               }`}
               aria-label="Map view"
             >
@@ -228,7 +222,7 @@ export function FloatingIslandNav() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-primary/10 hover:text-foreground"
+              className="floating-island__action flex h-9 w-9 items-center justify-center rounded-full transition-colors"
               aria-label="Collapse navigation"
             >
               <X className="h-4 w-4" />

@@ -17,6 +17,8 @@
   --glow-a: rgba(255, 210, 122, 0.55);
   --glow-b: rgba(139, 167, 166, 0.28);
   --theme-color: #ffe7c2;
+  --island-icon: color-mix(in srgb, var(--foreground) 62%, transparent);
+  --island-icon-hover: var(--foreground);
   --scene-veil: linear-gradient(
     180deg,
     rgba(255, 231, 194, 0.25) 0%,
@@ -70,6 +72,8 @@
   --glow-a: rgba(110, 196, 255, 0.18);
   --glow-b: rgba(20, 70, 140, 0.35);
   --theme-color: #031225;
+  --island-icon: color-mix(in srgb, var(--foreground) 68%, transparent);
+  --island-icon-hover: var(--foreground);
   --scene-veil: linear-gradient(
     180deg,
     rgba(3, 18, 37, 0.35) 0%,
@@ -221,7 +225,46 @@ html.dark .theme-scene__panel--dark {
   background: var(--scene-veil);
 }
 
-/* Soft grain over scene */
+/* ----- Floating island nav ----- */
+.floating-island {
+  background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+  border-color: var(--surface-border);
+  color: var(--island-icon);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.floating-island__link {
+  color: var(--island-icon);
+}
+
+.floating-island__link:hover {
+  color: var(--island-icon-hover);
+}
+
+.floating-island__link--active {
+  color: var(--primary);
+}
+
+.floating-island__link--active:hover {
+  color: var(--primary-hover);
+}
+
+.floating-island__action {
+  color: var(--island-icon);
+}
+
+.floating-island__action:hover {
+  color: var(--island-icon-hover);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.floating-island__action--active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+/* ----- Soft grain over scene ----- */
 .theme-scene::after {
   content: "";
   position: absolute;
