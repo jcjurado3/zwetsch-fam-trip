@@ -14,7 +14,8 @@ import {
   UtensilsCrossed,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
@@ -28,10 +29,36 @@ const navItems = [
 export function FloatingIslandNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
   const islandRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const fabIconRef = useRef<HTMLSpanElement>(null);
   const hasAnimatedOpen = useRef(false);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Reliable entrance — avoid GSAP revert leaving opacity at 0
+  useEffect(() => {
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (reduceMotion) {
+      setVisible(true);
+      setOpen(true);
+      return;
+    }
+
+    const show = window.setTimeout(() => setVisible(true), 40);
+    const expand = window.setTimeout(() => setOpen(true), 420);
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(expand);
+    };
+  }, []);
 
   useGSAP(
     () => {
@@ -48,7 +75,7 @@ export function FloatingIslandNav() {
           width: open ? "auto" : 56,
           borderRadius: open ? 28 : 999,
         });
-        gsap.set(content, { opacity: open ? 1 : 0, displayX: open ? 1 : 0 });
+        gsap.set(content, { opacity: open ? 1 : 0, scaleX: open ? 1 : 0 });
         return;
       }
 
@@ -85,8 +112,10 @@ export function FloatingIslandNav() {
           );
 
         hasAnimatedOpen.current = true;
-      } else {
-        gsap.timeline({ defaults: { ease: "power3.inOut" } })
+      } else if (hasAnimatedOpen.current) {
+        // Only collapse after we've opened once — avoid mounting in a collapse tween
+        gsap
+          .timeline({ defaults: { ease: "power3.inOut" } })
           .to(content.querySelectorAll(".island-item"), {
             opacity: 0,
             y: 6,
@@ -117,23 +146,15 @@ export function FloatingIslandNav() {
     { dependencies: [open], scope: islandRef }
   );
 
-  // Auto-open on first mount for the "opens from a circle" effect
-  useGSAP(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+  if (!mounted) return null;
 
-    if (reduceMotion) {
-      setOpen(true);
-      return;
-    }
-
-    const timer = window.setTimeout(() => setOpen(true), 180);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]">
+  return createPortal(
+    <div
+      className={`floating-island-root pointer-events-none !fixed inset-x-0 bottom-0 z-[100] flex justify-center px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] transition-[opacity,transform] duration-500 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+      }`}
+      style={{ position: "fixed" }}
+    >
       <div
         ref={islandRef}
         className="pointer-events-auto relative flex h-14 items-center justify-center overflow-hidden border border-surface-border shadow-[0_12px_40px_rgba(0,0,0,0.18)]"
@@ -146,7 +167,6 @@ export function FloatingIslandNav() {
           WebkitBackdropFilter: "blur(18px)",
         }}
       >
-        {/* Collapsed FAB affordance */}
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
@@ -155,12 +175,9 @@ export function FloatingIslandNav() {
           }`}
           aria-label={open ? "Collapse navigation" : "Open navigation"}
         >
-          <span ref={fabIconRef}>
-            <Menu className="h-6 w-6" />
-          </span>
+          <Menu className="h-6 w-6" />
         </button>
 
-        {/* Expanded island content */}
         <div
           ref={contentRef}
           className="flex w-full items-center gap-0.5 px-2 opacity-0"
@@ -219,6 +236,7 @@ export function FloatingIslandNav() {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

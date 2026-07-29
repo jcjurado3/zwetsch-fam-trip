@@ -135,7 +135,8 @@ body {
   background-color: var(--background);
 }
 
-body > * {
+/* Keep page chrome above the scenic layer; exclude portaled overlays */
+body > *:not(.floating-island-root):not(.theme-scene) {
   position: relative;
   z-index: 1;
 }
@@ -147,6 +148,13 @@ body > * {
   inset: 0;
   z-index: 0;
   overflow: hidden;
+}
+
+/* Hold UI until arrival sequence finishes */
+.page-arriving .page-content {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .theme-scene__panel {
@@ -392,6 +400,11 @@ html.dark .theme-scene__panel--dark {
 
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* App main content: breathing room + notch inset (don't let .safe-top zero out pt-*) */
+.page-content {
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
 }
 
 /* Horizontal chip/filter strips — touch-friendly, no visible scrollbar */

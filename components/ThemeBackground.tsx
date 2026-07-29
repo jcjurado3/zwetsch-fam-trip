@@ -1,17 +1,85 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { gsap } from "gsap";
+import { useArrival } from "@/components/ArrivalProvider";
 
 /**
- * Fixed dual-theme scenic background with subtle scroll parallax.
+ * Fixed dual-theme scenic background with arrival zoom + subtle scroll parallax.
  * Light = sunset beach; Dark = island/underwater.
+ * Portaled to document.body so page stacking (body > * z-index) can't bury it.
  */
 export function ThemeBackground() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const introPlayed = useRef(false);
+  const [mounted, setMounted] = useState(false);
+  const { arrived, markArrived } = useArrival();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Arrival: zoom out of the scene as if approaching the destination
+  // Wait until portaled DOM exists (mounted) before reading rootRef
+  useEffect(() => {
+    if (!mounted) return;
     const root = rootRef.current;
-    if (!root) return;
+    if (!root || introPlayed.current) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const alreadyArrived =
+      arrived || sessionStorage.getItem("zwetsch-arrived") === "1";
+
+    if (reduceMotion || alreadyArrived) {
+      introPlayed.current = true;
+      root.classList.add("theme-scene--settled");
+      markArrived();
+      return;
+    }
+
+    introPlayed.current = true;
+    const panels = root.querySelectorAll<HTMLElement>(".theme-scene__panel");
+    const art = root.querySelectorAll<HTMLElement>(".theme-scene__art");
+    const accents = root.querySelectorAll<HTMLElement>(".theme-scene__accent");
+    const veil = root.querySelectorAll<HTMLElement>(".theme-scene__veil");
+
+    gsap.set(root, { opacity: 1 });
+    gsap.set(art, { scale: 1.22, y: 48, transformOrigin: "50% 40%" });
+    gsap.set(accents, { scale: 1.35, y: 80, opacity: 0 });
+    gsap.set(veil, { opacity: 0.15 });
+    gsap.set(panels, { filter: "blur(10px) brightness(1.05)" });
+
+    const tl = gsap.timeline({
+      defaults: { ease: "power2.out" },
+      onComplete: () => {
+        root.classList.add("theme-scene--settled");
+        markArrived();
+      },
+    });
+
+    tl.to(art, { scale: 1, y: 0, duration: 1.55, ease: "power3.out" }, 0)
+      .to(
+        accents,
+        { scale: 1, y: 0, opacity: 1, duration: 1.35, ease: "power3.out" },
+        0.15
+      )
+      .to(panels, { filter: "none", duration: 1.2 }, 0.1)
+      .to(veil, { opacity: 1, duration: 0.9 }, 0.45);
+
+    return () => {
+      tl.kill();
+    };
+    // Intentionally depends on mounted only — intro should not restart on arrival flips
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
+
+  // Subtle scroll parallax after settling
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !arrived) return;
 
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -52,14 +120,12 @@ export function ThemeBackground() {
       window.removeEventListener("scroll", onScroll);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [arrived]);
 
-  return (
-    <div
-      ref={rootRef}
-      className="theme-scene"
-      aria-hidden="true"
-    >
+  if (!mounted) return null;
+
+  return createPortal(
+    <div ref={rootRef} className="theme-scene" aria-hidden="true">
       {/* Light — sunset beach */}
       <div className="theme-scene__panel theme-scene__panel--light">
         <div className="theme-scene__art" data-parallax="far">
@@ -105,6 +171,7 @@ export function ThemeBackground() {
         </div>
         <div className="theme-scene__veil theme-scene__veil--dark" />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
